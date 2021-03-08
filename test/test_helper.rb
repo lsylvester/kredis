@@ -3,12 +3,15 @@ require "active_support/test_case"
 require "active_support/testing/autorun"
 require "minitest/mock"
 require "byebug"
-
+require 'global_id'
 require "kredis"
+
 
 Kredis.configurator = Class.new { def config_for(name) {} end }.new
 
 Kredis.logger = Logger.new(STDOUT) if ENV["VERBOSE"]
+
+GlobalID.app = 'kredis'
 
 class ActiveSupport::TestCase
   teardown { Kredis.clear_all }

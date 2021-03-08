@@ -50,6 +50,14 @@ class ScalarTest < ActiveSupport::TestCase
     assert_equal({ "one" => 1, "string" => "hello" }, json.value)
   end
 
+  test "global_id" do
+    model = Kredis.scalar "mymodel", typed: :global_id
+
+    model.value = Contact.find(1)
+
+    assert_equal model.value, Contact.find(1)
+  end
+
   test "invalid type" do
     nothere = Kredis.scalar "myscalar", typed: :nothere
     nothere.value = true

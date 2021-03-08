@@ -1,4 +1,5 @@
 require "test_helper"
+require 'models/contact'
 
 class UniqueListTest < ActiveSupport::TestCase
   setup { @list = Kredis.unique_list "myuniquelist" }
@@ -39,5 +40,14 @@ class UniqueListTest < ActiveSupport::TestCase
 
     @list.remove(2)
     assert_equal [ 1 ], @list.elements
+  end
+
+  test "typed as global_ids" do
+    @list = Kredis.unique_list "idlist", typed: :global_id
+
+    @list.append Contact.find(2)
+    @list.append Contact.find(1)
+
+    assert_equal [ Contact.find(2), Contact.find(1) ], @list.elements
   end
 end

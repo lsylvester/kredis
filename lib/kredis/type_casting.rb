@@ -3,7 +3,7 @@ require "json"
 module Kredis::TypeCasting
   class InvalidType < StandardError; end
 
-  VALID_TYPES = %i[ string integer decimal float boolean datetime json ]
+  VALID_TYPES = %i[ string integer decimal float boolean datetime json global_id]
 
   def type_to_string(value)
     case value
@@ -21,6 +21,8 @@ module Kredis::TypeCasting
       value.iso8601(9)
     when Hash
       JSON.dump(value)
+    when GlobalID::Identification
+      value.to_gid_param
     else
       value
     end
@@ -37,6 +39,7 @@ module Kredis::TypeCasting
     when :boolean     then value == "t" ? true : false
     when :datetime    then Time.iso8601(value)
     when :json        then JSON.load(value)
+    when :global_id   then GlobalID::Locator.locate(value)
     end if value.present?
   end
 
@@ -45,6 +48,11 @@ module Kredis::TypeCasting
   end
 
   def strings_to_types(values, type)
-    Array(values).flatten.map { |value| string_to_type(value, type) }
+    case type
+    when :global_id
+      GlobalID::Locator.locate_many(Array(values).flatten, ignore_missing: true)
+    else
+      Array(values).flatten.map { |value| string_to_type(value, type) }
+    end
   end
 end
